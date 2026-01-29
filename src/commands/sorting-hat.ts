@@ -1,6 +1,5 @@
-import { db } from '../lib/db.js'
+import { findOrCreateUser } from '../lib/db.js'
 import type { Command } from './index.js';
-import { users } from '../db/schema.js';
 
 export default {
   data: {
@@ -8,8 +7,9 @@ export default {
     description: 'Sort yourself into a house!',
   },
   async execute(interaction) {
+    const user = await findOrCreateUser(interaction.user.id);
     interaction.reply({
-      content: `Users: \`\`\`\n${(await db.select().from(users)).toString()}\`\`\``
+      content: `User: ${user?.id}`
     })
   },
 } satisfies Command;
