@@ -1,0 +1,39 @@
+{
+	"$schema": "https://json.schemastore.org/package.json",
+	"name": "NoobusHattus",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"build": "tsc",
+		"lint": "prettier --check . && eslint --ext .ts --format=pretty src",
+		"deploy": "node --env-file=.env dist/src/util/deploy.js",
+		"format": "prettier --write . && eslint --ext .ts --fix --format=pretty src",
+		"start": "node --env-file=.env dist/src/index.js",
+		"dev": "npm run build && npm run start"
+	},
+	"dependencies": {
+		"@discordjs/core": "^2.3.0",
+		"discord.js": "^14.24.0",
+		"dotenv": "^17.2.3",
+		"drizzle-orm": "^0.45.1",
+		"pg": "^8.17.2"
+	},
+	"devDependencies": {
+		"@sapphire/ts-config": "^5.0.1",
+		"@types/node": "^22.18.8",
+		"@types/pg": "^8.16.0",
+		"drizzle-kit": "^0.31.8",
+		"eslint": "^9.37.0",
+		"eslint-config-neon": "^0.2.7",
+		"eslint-formatter-compact": "^8.40.0",
+		"eslint-formatter-pretty": "^7.0.0",
+		"prettier": "^3.6.2",
+		"tsx": "^4.21.0",
+		"typescript": "~5.9.3",
+		"zod": "^3.25.76"
+	},
+	"engines": {
+		"node": ">=22.12.0"
+	}
+}
