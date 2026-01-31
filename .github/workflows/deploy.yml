@@ -17,7 +17,5 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            cd /home/ubuntu/noobushattus
-            git pull origin main
-            npm install --production
-            npm run dev
+            cd /home/ubuntu/
+            bash deploy.sh
