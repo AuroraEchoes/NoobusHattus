@@ -18,7 +18,16 @@ export class Seasons {
   }
 
   static async get(): Promise<SeasonModel[]> {
-    const allSeasons = await db.select().from(seasons)
+    const allSeasons = await db.select().from(seasons).orderBy(seasons.id)
     return allSeasons
+  }
+
+  static async setActive(seasonId: number, isActive: boolean): Promise<undefined | SeasonModel> {
+    console.log("Season id: " + seasonId.toString())
+    const updated = await db.update(seasons)
+      .set({ is_active: isActive })
+      .where(eq(seasons.id, seasonId))
+      .returning()
+    return updated.length > 0 ? updated[0] : undefined
   }
 }

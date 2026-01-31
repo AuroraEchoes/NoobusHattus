@@ -1,6 +1,6 @@
 import { ApplicationCommandOptionType } from '@discordjs/core';
-import { Seasons } from '../db/seasons.js';
-import type { Command } from './index.js';
+import { Seasons } from '../../db/seasons.js';
+import type { Command } from '../index.js';
 
 export default {
   data: {
