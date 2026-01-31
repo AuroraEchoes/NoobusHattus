@@ -39,20 +39,23 @@ export class Houses {
     // Assign to a random selection of the smallest houses
     const seasonHouses = await db.select({ id: houses.id, count: count(user_houses.user_id) })
       .from(houses)
-      .where(eq(user_houses.season_id, seasonId))
+      .where(eq(houses.season_id, seasonId))
       .leftJoin(user_houses, eq(houses.id, user_houses.house_id))
-      .groupBy(user_houses.house_id)
+      .groupBy(houses.id)
 
     if (seasonHouses.length === 0) {
-      console.warn(`Tried to assign ${userId} to a house for season ${seasonId}`)
+      console.warn(`Tried to assign ${userId} to a house for season ${seasonId} but there were no houses`)
       return undefined
     }
     const minCount = seasonHouses.map((val, _) => val.count).reduce((acc, curr) => Math.min(acc, curr))
     const viableHouses = seasonHouses.filter(house => house.count == minCount)
     const chosenIdx = Math.floor(Math.random() * viableHouses.length)
     const chosenHouse = viableHouses[chosenIdx]
-    const house = await db.select().from(houses).where(eq(houses.id, chosenHouse.id))
-    return house[0]
+    const house = (await db.select().from(houses).where(eq(houses.id, chosenHouse.id)))[0]
+
+    // Add user to the house
+    await db.insert(user_houses).values({ user_id: userId, house_id: house.id, season_id: seasonId })
+    return house
   }
 
   static async create(seasonId: number, houseName: string, houseEmoji: string): Promise<HouseModel> {

@@ -10,7 +10,6 @@ export class Users {
     const usersQuery = await db.selectDistinct().from(users).where(eq(users.discord_id, BigInt(discordId)))
     if (usersQuery.length === 0) {
       const userInfo = await citadelQuery(`/users/discord_id/${discordId}`)
-      console.log(userInfo)
       if (userInfo === undefined) {
         return undefined;
       }
