@@ -21,7 +21,8 @@ export const houses = pgTable("houses", {
 
 export const user_houses = pgTable("user_houses", {
   user_id: bigint({ mode: 'bigint' }).notNull().references(() => users.id),
-  season_id: integer().notNull().references(() => seasons.id)
+  season_id: integer().notNull().references(() => seasons.id),
+  house_id: integer().notNull().references(() => houses.id)
 }, (table) => [primaryKey({ columns: [table.user_id, table.season_id] })])
 
 export const point_actions = pgTable("point_actions", {
