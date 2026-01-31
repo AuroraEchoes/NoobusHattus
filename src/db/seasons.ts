@@ -22,6 +22,11 @@ export class Seasons {
     return allSeasons
   }
 
+  static async getById(seasonId: number): Promise<SeasonModel | undefined> {
+    const season = await db.select().from(seasons).where(eq(seasons.id, seasonId))
+    return season.length === 1 ? season[0] : undefined
+  }
+
   static async setActive(seasonId: number, isActive: boolean): Promise<undefined | SeasonModel> {
     console.log("Season id: " + seasonId.toString())
     const updated = await db.update(seasons)
