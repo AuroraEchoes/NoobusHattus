@@ -54,4 +54,13 @@ export class Houses {
     const house = await db.select().from(houses).where(eq(houses.id, chosenHouse.id))
     return house[0]
   }
+
+  static async create(seasonId: number, houseName: string, houseEmoji: string): Promise<HouseModel> {
+    // Check the referenced season exists
+    const house = await db
+      .insert(houses)
+      .values({ house_name: houseName, house_emoji: houseEmoji, season_id: seasonId })
+      .returning()
+    return house[0]
+  }
 }
