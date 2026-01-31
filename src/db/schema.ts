@@ -57,7 +57,7 @@ export const logged_messages = pgTable("logged_messages", {
 export const summary_messages = pgTable("summary_messages", {
   channel_id: bigint({ mode: 'bigint' }).notNull(),
   guild_id: bigint({ mode: 'bigint' }).notNull(),
-  message_id: bigint({ mode: 'bigint' }).notNull().unique()
+  message_id: bigint({ mode: 'bigint' }).notNull().unique(),
 }, (table) => [
   primaryKey({ columns: [table.guild_id, table.channel_id] }),
   foreignKey({

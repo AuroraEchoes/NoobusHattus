@@ -10,7 +10,7 @@ export class Houses {
     return seasonHouses;
   }
 
-  static async getbyUserBySeason(userId: bigint, seasonId: number): Promise<HouseModel | undefined> {
+  static async getByUserBySeason(userId: bigint, seasonId: number): Promise<HouseModel | undefined> {
     const inHouse = await db.select().from(user_houses).where(and(
       eq(user_houses.user_id, userId),
       eq(user_houses.season_id, seasonId)
@@ -22,6 +22,11 @@ export class Houses {
 
     const house = await db.select().from(houses).where(eq(houses.id, inHouse[0].house_id))
     return house[0];
+  }
+
+  static async getById(houseId: number): Promise<HouseModel | undefined> {
+    const house = await db.select().from(houses).where(eq(houses.id, houseId))
+    return house.length === 1 ? house[0] : undefined
   }
 
   static async getOrAssignForUser(userId: bigint, seasonId: number): Promise<HouseModel | undefined> {

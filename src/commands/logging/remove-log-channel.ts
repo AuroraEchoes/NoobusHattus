@@ -1,5 +1,5 @@
 import type { Command } from '../index.js';
-import { LogChannel } from '../../db/log-channels.js';
+import { LogChannels } from '../../db/log-channels.js';
 
 export default {
   data: {
@@ -14,7 +14,7 @@ export default {
     if (!interaction.isChatInputCommand()) return;
     const channelId = BigInt(interaction.channelId);
     const guildId = BigInt(interaction.guildId!);
-    await LogChannel.delete(channelId, guildId)
+    await LogChannels.delete(channelId, guildId)
     await interaction.reply(`Removed <#${channelId}> as a log channel`);
   },
 } satisfies Command;

@@ -28,7 +28,6 @@ export class Seasons {
   }
 
   static async setActive(seasonId: number, isActive: boolean): Promise<undefined | SeasonModel> {
-    console.log("Season id: " + seasonId.toString())
     const updated = await db.update(seasons)
       .set({ is_active: isActive })
       .where(eq(seasons.id, seasonId))

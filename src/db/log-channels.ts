@@ -4,7 +4,7 @@ import { log_channels } from "./schema.js";
 
 export type LogChannelModel = InferSelectModel<typeof log_channels>;
 
-export class LogChannel {
+export class LogChannels {
   static async getBySeason(seasonId: number): Promise<LogChannelModel[]> {
     const logChannels = await db.select().from(log_channels).where(eq(log_channels.season_id, BigInt(seasonId)));
     return logChannels;

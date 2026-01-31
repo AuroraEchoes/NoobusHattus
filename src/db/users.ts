@@ -6,7 +6,7 @@ import { citadelQuery } from "../lib/citadel.js";
 export type UserModel = InferSelectModel<typeof users>;
 
 export class Users {
-  static async findOrCreate(discordId: string): Promise<UserModel | undefined> {
+  static async findOrCreate(discordId: bigint): Promise<UserModel | undefined> {
     const usersQuery = await db.selectDistinct().from(users).where(eq(users.discord_id, BigInt(discordId)))
     if (usersQuery.length === 0) {
       const userInfo = await citadelQuery(`/users/discord_id/${discordId}`)
@@ -24,5 +24,10 @@ export class Users {
     else {
       return usersQuery[0];
     }
+  }
+
+  static async getById(userId: bigint): Promise<UserModel | undefined> {
+    const user = await db.select().from(users).where(eq(users.id, userId))
+    return user.length === 1 ? user[0] : undefined
   }
 }
