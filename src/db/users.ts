@@ -30,4 +30,14 @@ export class Users {
     const user = await db.select().from(users).where(eq(users.id, userId))
     return user.length === 1 ? user[0] : undefined
   }
+
+  static async getByDiscordId(discordId: bigint): Promise<UserModel | undefined> {
+    const user = await db.select().from(users).where(eq(users.discord_id, discordId))
+    return user.length === 1 ? user[0] : undefined
+  }
+
+  static async getBySteamId(steamId: bigint): Promise<UserModel | undefined> {
+    const user = await db.select().from(users).where(eq(users.steam_id, steamId))
+    return user.length === 1 ? user[0] : undefined
+  }
 }

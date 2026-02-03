@@ -72,3 +72,7 @@ export const permission_roles = pgTable("permission_roles", {
 }, (table) => [
   primaryKey({ columns: [table.permission, table.role_id] })
 ])
+
+export const processed_logs = pgTable("processed_logs", {
+  log_id: bigint({ mode: 'bigint' }).primaryKey().unique()
+})

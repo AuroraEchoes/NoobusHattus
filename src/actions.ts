@@ -6,26 +6,26 @@ import { Logging } from "./logging.js";
 
 export class ActionManager {
   static async applyActionAsUser(targetDiscordId: bigint, sourceDiscordId: bigint, reason: string, value: number): Promise<PointActionModel[] | undefined> {
-    return this.applyAction(targetDiscordId, sourceDiscordId, reason, value)
-  }
-
-  static async applyActionAsSystem(targetDiscordId: bigint, reason: string, value: number): Promise<PointActionModel[] | undefined> {
-    return this.applyAction(targetDiscordId, undefined, reason, value)
-  }
-
-  static async applyAction(targetDiscordId: bigint, sourceDiscordId: bigint | undefined, reason: string, value: number): Promise<PointActionModel[] | undefined> {
-    const target = await Users.findOrCreate(targetDiscordId)
-    const source = sourceDiscordId !== undefined ? await Users.findOrCreate(sourceDiscordId) : undefined
-    const actions = []
-    if (target === undefined) {
-      return undefined;
+    const targetId = await Users.getByDiscordId(targetDiscordId)
+    const sourceId = await Users.getByDiscordId(sourceDiscordId)
+    if (targetId === undefined) {
+      return undefined
     }
+    return this.applyAction(targetId.id, sourceId?.id, reason, value)
+  }
+
+  static async applyActionAsSystem(targetId: bigint, reason: string, value: number): Promise<PointActionModel[] | undefined> {
+    return this.applyAction(targetId, undefined, reason, value)
+  }
+
+  static async applyAction(targetId: bigint, sourceId: bigint | undefined, reason: string, value: number): Promise<PointActionModel[] | undefined> {
+    const actions = []
     const activeSeasons = await Seasons.getActive();
     for (const season of activeSeasons) {
-      const house = await Houses.getByUserBySeason(target.id, season.id)
+      const house = await Houses.getByUserBySeason(targetId, season.id)
       if (house !== undefined) {
 
-        const action = await PointActions.insert(Number(target.id), house.id, source?.id, reason, value)
+        const action = await PointActions.insert(Number(targetId), house.id, sourceId, reason, value)
         if (action !== undefined) {
           await Logging.logAction(action)
           actions.push(action)
