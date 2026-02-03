@@ -1,4 +1,5 @@
 import { Seasons } from '../../db/seasons.js';
+import { Permission, PermissionManager } from '../../permissions.js';
 import type { Command } from '../index.js';
 
 export default {
@@ -7,10 +8,8 @@ export default {
     description: 'List all seasons',
   },
 
-  // TODO: Add some sort of security verification to ensure the user should be able to run this command
-  // DO NOT LAUNCH WITHOUT THIS
-  // OR YOUR KNEECAPS WILL BE MINE
   async execute(interaction) {
+    if (!PermissionManager.requirePermission(interaction, Permission.MANAGE_BOT)) return
     const allSeasons = await Seasons.get()
     let replyBuf = []
     for (const season of allSeasons) {

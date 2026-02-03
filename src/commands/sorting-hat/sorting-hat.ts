@@ -3,6 +3,7 @@ import { Houses } from '../../db/houses.js';
 import { Seasons } from '../../db/seasons.js';
 import { Users } from '../../db/users.js';
 import type { Command } from '../index.js';
+import { Permission, PermissionManager } from '../../permissions.js';
 
 export default {
   data: {
@@ -23,6 +24,7 @@ export async function sortUser(interaction: CommandInteraction<CacheType>, targe
   // TODO: Add a role_id param to the house table so that can be assigned
   // Ending a season should unassign all these roles, and we probably need
   // some sort of admin command to mass-manage house roles (TBD)
+  if (!PermissionManager.requirePermission(interaction, Permission.USE_BOT)) return
   const user = await Users.findOrCreate(BigInt(targetDiscordId));
   if (user === undefined) {
     interaction.reply("You don’t have an ozfortress.com account linked to your Discord")

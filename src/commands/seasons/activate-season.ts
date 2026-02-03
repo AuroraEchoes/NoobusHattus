@@ -1,6 +1,7 @@
 import { ApplicationCommandOptionType } from '@discordjs/core';
 import { Seasons } from '../../db/seasons.js';
 import type { Command } from '../index.js';
+import { Permission, PermissionManager } from '../../permissions.js';
 
 export default {
   data: {
@@ -16,10 +17,8 @@ export default {
     ]
   },
 
-  // TODO: Add some sort of security verification to ensure the user should be able to run this command
-  // DO NOT LAUNCH WITHOUT THIS
-  // OR YOUR KNEECAPS WILL BE MINE
   async execute(interaction) {
+    if (!PermissionManager.requirePermission(interaction, Permission.MANAGE_BOT)) return
     if (!interaction.isChatInputCommand()) return;
     const seasonId = interaction.options.getInteger("season-id")!
     const changedSeason = await Seasons.setActive(seasonId, true)

@@ -1,5 +1,6 @@
 import type { Command } from '../index.js';
 import { LogChannels } from '../../db/log-channels.js';
+import { Permission, PermissionManager } from '../../permissions.js';
 
 export default {
   data: {
@@ -7,10 +8,8 @@ export default {
     description: "Remove the current channel as a log channel",
   },
 
-  // TODO: Add some sort of security verification to ensure the user should be able to run this command
-  // DO NOT LAUNCH WITHOUT THIS
-  // OR YOUR KNEECAPS WILL BE MINE
   async execute(interaction) {
+    if (!PermissionManager.requirePermission(interaction, Permission.MANAGE_BOT)) return
     if (!interaction.isChatInputCommand()) return;
     const channelId = BigInt(interaction.channelId);
     const guildId = BigInt(interaction.guildId!);
