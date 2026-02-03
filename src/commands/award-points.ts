@@ -1,6 +1,7 @@
 import { ApplicationCommandOptionType } from '@discordjs/core';
 import type { Command } from './index.js';
 import { ActionManager } from '../actions.js';
+import { Permission, PermissionManager } from '../permissions.js';
 
 export default {
   data: {
@@ -32,6 +33,10 @@ export default {
   // DO NOT LAUNCH WITHOUT THIS
   // OR YOUR KNEECAPS WILL BE MINE
   async execute(interaction) {
+    if (!PermissionManager.requirePermission(interaction, Permission.AWARD_POINTS)) {
+      return
+    }
+
     if (!interaction.isChatInputCommand()) return;
     const target = BigInt(interaction.options.getUser("target")!.id)
     const amount = interaction.options.getInteger("amount")!

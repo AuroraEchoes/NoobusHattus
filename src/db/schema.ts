@@ -65,3 +65,10 @@ export const summary_messages = pgTable("summary_messages", {
     foreignColumns: [log_channels.guild_id, log_channels.channel_id]
   })
 ])
+
+export const permission_roles = pgTable("permission_roles", {
+  permission: varchar({ length: 32 }),
+  role_id: bigint({ mode: 'bigint' })
+}, (table) => [
+  primaryKey({ columns: [table.permission, table.role_id] })
+])
