@@ -45,6 +45,8 @@ export default {
 function embed(house: HouseModel): EmbedBuilder {
   return successEmbed
     .setTitle("House Successfully Created")
-    .setDescription(`${house.house_emoji} ${house.house_name}`)
-    .addFields([{ name: "House ID", value: `\`${house.id}\``, inline: true }])
+    .addFields([
+      { name: "House Name", value: `\`${house.house_name}\``, inline: true },
+      { name: "House ID", value: `\`${house.id}\``, inline: true }
+    ])
 }

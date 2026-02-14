@@ -11,14 +11,20 @@ export class LogChannels {
   }
 
   static async create(seasonId: number, channelId: bigint, guildId: bigint): Promise<LogChannelModel | undefined> {
-    const newChannel = await db.insert(log_channels)
-      .values({ channel_id: channelId, guild_id: guildId, season_id: BigInt(seasonId) })
-      .returning()
-    return newChannel[0];
+    try {
+      const newChannel = await db.insert(log_channels)
+        .values({ channel_id: channelId, guild_id: guildId, season_id: BigInt(seasonId) })
+        .returning()
+
+      return newChannel[0];
+    }
+    catch (e) { return undefined; }
   }
 
-  static async delete(channelId: bigint, guildId: bigint): Promise<void> {
-    await db.delete(log_channels)
+  static async delete(channelId: bigint, guildId: bigint): Promise<LogChannelModel | undefined> {
+    const delChannel = await db.delete(log_channels)
       .where(and(eq(log_channels.channel_id, channelId), eq(log_channels.guild_id, guildId)))
+      .returning()
+    return delChannel.length === 1 ? delChannel[0] : undefined
   }
 }
