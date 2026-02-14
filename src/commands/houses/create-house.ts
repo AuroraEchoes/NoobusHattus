@@ -1,7 +1,9 @@
 import { ApplicationCommandOptionType } from '@discordjs/core';
 import type { Command } from '../index.js';
-import { Houses } from '../../db/houses.js';
+import { HouseModel, Houses } from '../../db/houses.js';
 import { Permission, PermissionManager } from '../../permissions.js';
+import { EmbedBuilder } from 'discord.js';
+import { successEmbed } from '../../lib/embeds.js';
 
 export default {
   data: {
@@ -36,6 +38,13 @@ export default {
     const houseName = interaction.options.getString("house-name")!
     const houseEmoji = interaction.options.getString("house-emoji")!
     const house = await Houses.create(seasonId, houseName, houseEmoji)
-    await interaction.reply(`Created House ${house.house_emoji} ${house.house_name} (\`${house.id}\`)`);
+    await interaction.reply({ embeds: [embed(house)], ephemeral: true });
   },
 } satisfies Command;
+
+function embed(house: HouseModel): EmbedBuilder {
+  return successEmbed
+    .setTitle("House Successfully Created")
+    .setDescription(`${house.house_emoji} ${house.house_name}`)
+    .addFields([{ name: "House ID", value: `\`${house.id}\``, inline: true }])
+}
