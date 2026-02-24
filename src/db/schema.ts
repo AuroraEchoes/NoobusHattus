@@ -74,5 +74,5 @@ export const permission_roles = pgTable("permission_roles", {
 ])
 
 export const processed_logs = pgTable("processed_logs", {
-  log_id: bigint({ mode: 'bigint' }).primaryKey().unique()
+  log_id: bigint({ mode: 'bigint' }).primaryKey().unique(),
 })

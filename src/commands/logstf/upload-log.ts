@@ -1,9 +1,10 @@
-import { ApplicationCommandOptionType } from 'discord.js';
+import { ApplicationCommandOptionType, EmbedBuilder } from 'discord.js';
 import type { Command } from '../index.js';
 import { Permission, PermissionManager } from '../../permissions.js';
 import { LogsTfResponse } from './type-spec.js';
 import { LogAwards } from './log-awards.js';
 import { ProcessedLogs } from '../../db/processed-logs.js';
+import { failureEmbed, successEmbed } from '../../lib/embeds.js';
 
 export default {
   data: {
@@ -37,23 +38,23 @@ export default {
     const regex = /(?:https?:\/\/)?(?:logs\.tf\/)?(\d+).*/
     const result = logString.match(regex)
     if (result === null) {
-      interaction.reply("Could not process log link. Please upload either the link (i.e. `https://logs.tf/LOG_ID`) or the log (i.e. `LOG_ID`")
+      await interaction.reply({ embeds: [(logLinkInvalidEmbed())], ephemeral: true });
     }
     else {
       const logId = result[1]
       if (await ProcessedLogs.contains(BigInt(logId))) {
-        interaction.reply("This log has already been processed")
+        await interaction.reply({ embeds: [(logAlreadyProcessedEmbed(logId))], ephemeral: true });
       }
       else {
         const redCap = interaction.options.getUser("red-captain")!
         const bluCap = interaction.options.getUser("blu-captain")!
         const logsTfResponse = await queryLog(logId)
         if (logsTfResponse === undefined) {
-          interaction.reply("Log could not be found (did you enter the right ID/URL?)")
+          await interaction.reply({ embeds: [logNotFoundEmbed(logId)], ephemeral: true });
         }
         else {
           LogAwards.applyAwards(logsTfResponse, BigInt(redCap.id), BigInt(bluCap.id))
-          interaction.reply(`Successfully processed log \`${logId}\``)
+          await interaction.reply({ embeds: [embed(logId)], ephemeral: true });
         }
       }
     }
@@ -71,5 +72,36 @@ async function queryLog(logId: string): Promise<undefined | LogsTfResponse> {
   else {
     return await res.json() as LogsTfResponse
   }
+}
+
+function embed(logId: string): EmbedBuilder {
+  return successEmbed
+    .setTitle("Log successfully processed")
+    .addFields([
+      { name: "Log ID", value: `\`${logId}\``, inline: true },
+    ])
+}
+
+function logNotFoundEmbed(logId: string): EmbedBuilder {
+  return failureEmbed
+    .setTitle("Log not found")
+    .setDescription("Did you enter the right ID/URL?")
+    .addFields([
+      { name: "Log ID", value: `\`${logId}\``, inline: true },
+    ])
+}
+
+function logLinkInvalidEmbed(): EmbedBuilder {
+  return failureEmbed
+    .setTitle("Log format invalid")
+    .setDescription("Please upload either the link (i.e. `https://logs.tf/LOG_ID`) or the log (i.e. `LOG_ID`")
+}
+
+function logAlreadyProcessedEmbed(logId: string): EmbedBuilder {
+  return failureEmbed
+    .setTitle("Log already processed")
+    .addFields([
+      { name: "Log ID", value: `\`${logId}\``, inline: true },
+    ])
 
 }
