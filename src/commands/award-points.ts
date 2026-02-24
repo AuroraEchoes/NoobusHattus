@@ -2,6 +2,9 @@ import { ApplicationCommandOptionType } from '@discordjs/core';
 import type { Command } from './index.js';
 import { ActionManager } from '../actions.js';
 import { Permission, PermissionManager } from '../permissions.js';
+import { failureEmbed, successEmbed } from '../lib/embeds.js';
+import { PointActionModel } from '../db/point-actions.js';
+import { EmbedBuilder } from 'discord.js';
 
 export default {
   data: {
@@ -29,9 +32,6 @@ export default {
     ]
   },
 
-  // TODO: Add some sort of security verification to ensure the user should be able to run this command
-  // DO NOT LAUNCH WITHOUT THIS
-  // OR YOUR KNEECAPS WILL BE MINE
   async execute(interaction) {
     if (!PermissionManager.requirePermission(interaction, Permission.AWARD_POINTS)) return
 
@@ -44,10 +44,26 @@ export default {
 
     const result = await ActionManager.applyActionAsUser(target, source, reason, amount)
     if (result === undefined || result.length === 0) {
-      await interaction.reply(`Could not award points to <@${target}> (are they a member of an active house?)`)
+      await interaction.reply({ embeds: [embedFailure(target)], ephemeral: true });
     }
     else {
-      await interaction.reply(`Awarded \`${amount}\` points to <@${target}> for ${reason}`)
+      await interaction.reply({ embeds: [embedSuccess(target, result[0])], ephemeral: true });
     }
   },
 } satisfies Command;
+
+function embedSuccess(userDiscordId: bigint, action: PointActionModel): EmbedBuilder {
+  return successEmbed
+    .setTitle("Awarded points")
+    .setFields([
+      { name: "Target", value: `<@${userDiscordId}>` },
+      { name: "Quantity", value: `${action.point_value}` },
+      { name: "Reason", value: `${action.reason}` }
+    ])
+}
+
+function embedFailure(targetId: bigint): EmbedBuilder {
+  return failureEmbed
+    .setTitle("Failed to award points")
+    .setDescription(`Could not award points to <@${targetId}> (are they a member of an active house?)`)
+}

@@ -28,7 +28,7 @@ export async function sortUser(interaction: CommandInteraction<CacheType>, targe
   if (!PermissionManager.requirePermission(interaction, Permission.USE_BOT)) return
   const user = await Users.findOrCreate(BigInt(targetDiscordId));
   if (user === undefined) {
-    interaction.reply("You don’t have an ozfortress.com account linked to your Discord")
+    await interaction.reply({ embeds: [embedNoLinkedOzfAccount()], ephemeral: true });
     return
   }
 
@@ -84,4 +84,10 @@ function embedNoActiveSeasons(): EmbedBuilder {
   return failureEmbed
     .setTitle("No active seasons")
     .setDescription(`There are no active seasons.`)
+}
+
+function embedNoLinkedOzfAccount(): EmbedBuilder {
+  return failureEmbed
+    .setTitle("No linked \`ozfortress.com\` account")
+    .setDescription(`You must link your Discord to your \`ozfortres.com\` account. Do this in Settings → Connections, then try again.`)
 }
