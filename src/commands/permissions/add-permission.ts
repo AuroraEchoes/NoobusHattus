@@ -41,7 +41,6 @@ export default {
       const res = await PermissionRoles.addPermissionToRole(permission, BigInt(role.id))
       if (res === undefined) {
         await interaction.reply({ embeds: [embedFailure(permission.toString(), role.id)], ephemeral: true });
-        interaction.reply(`Error giving <@&${role.id}> permission ${permission}`)
       } else {
         await interaction.reply({ embeds: [embedSuccess(permission.toString(), role.id)], ephemeral: true });
       }
@@ -60,7 +59,6 @@ function embedFailure(permission: string, roleId: string): EmbedBuilder {
     .setTitle("Error adding role")
     .setDescription(`<@&${roleId}> was not successfully given permission ${permission}`)
 }
-
 
 function embedAlreadyHasPermission(permission: string, roleId: string): EmbedBuilder {
   return failureEmbed

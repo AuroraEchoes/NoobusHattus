@@ -1,6 +1,8 @@
 import type { Command } from '../index.js';
 import { Permission, PermissionManager } from "../../permissions.js";
 import { PermissionRoles } from "../../db/permission-roles.js";
+import { successEmbed } from '../../lib/embeds.js';
+import { EmbedBuilder } from 'discord.js';
 
 export default {
   data: {
@@ -11,13 +13,24 @@ export default {
   async execute(interaction) {
     if (!PermissionManager.requirePermission(interaction, Permission.MANAGE_BOT)) return
     if (!interaction.isChatInputCommand()) return;
-    const msgBuf = [`### Bot Permissions`]
 
     const permissionNames = Object.values(Permission).filter(val => typeof val === "string")
+    const map: Map<string, bigint[]> = new Map();
     for (const permission of permissionNames) {
       const rolesWithPermission = await PermissionRoles.getRolesWithPermission(permission as unknown as Permission)
-      msgBuf.push(`\`${permission}\`: ${rolesWithPermission.length === 0 ? "None" : rolesWithPermission.map(role => `<@&${role.role_id}>`).join(", ")}`)
+      map.set(permission, Array.from(rolesWithPermission.map((val, _) => val.role_id).filter(x => x !== null)))
     }
-    interaction.reply(msgBuf.join("\n"))
+    await interaction.reply({ embeds: [embedSuccess(map)], ephemeral: true });
   },
 } satisfies Command;
+
+function embedSuccess(permissions: Map<string, bigint[]>): EmbedBuilder {
+  return successEmbed
+    .setTitle("Permissions List")
+    .addFields(
+      Array.from(permissions.entries()).map(([key, roles]) => ({
+        name: key,
+        value: roles.map(role => `<@&${role}>`).join(", ") || "None"
+      }))
+    );
+}
