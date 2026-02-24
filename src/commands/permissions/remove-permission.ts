@@ -1,8 +1,9 @@
-import { ApplicationCommandOptionType } from "discord.js";
+import { ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
 import type { Command } from '../index.js';
 import { Permission, PermissionManager } from "../../permissions.js";
 import { PermissionRoles } from "../../db/permission-roles.js";
 import { permissionChoices } from "./permission-utils.js";
+import { failureEmbed, successEmbed } from "../../lib/embeds.js";
 
 export default {
   data: {
@@ -34,15 +35,33 @@ export default {
       .map(role => role.role_id)
       .includes(BigInt(role.id))
     if (!alreadyHasRole) {
-      interaction.reply(`Role <@&${role.id}> already does not have permission ${permission}`)
+      await interaction.reply({ embeds: [embedAlreadyDoesNotHavePermission(permission.toString(), role.id)], ephemeral: true });
     }
     else {
       const res = await PermissionRoles.removePermissionFromRole(permission, BigInt(role.id))
       if (res === undefined) {
-        interaction.reply(`Error removing <@&${role.id}> permission ${permission}`)
+        await interaction.reply({ embeds: [embedFailure(permission.toString(), role.id)], ephemeral: true });
       } else {
-        interaction.reply(`Removed <@&${role.id}> permission ${permission}`)
+        await interaction.reply({ embeds: [embedSuccess(permission.toString(), role.id)], ephemeral: true });
       }
     }
   },
 } satisfies Command;
+
+function embedSuccess(permission: string, roleId: string): EmbedBuilder {
+  return successEmbed
+    .setTitle("Permission removed from role")
+    .setDescription(`<@&${roleId}> no longer has permission ${permission}`)
+}
+
+function embedFailure(permission: string, roleId: string): EmbedBuilder {
+  return failureEmbed
+    .setTitle("Error adding role")
+    .setDescription(`<@&${roleId}> did not successfully have ${permission} removed`)
+}
+
+function embedAlreadyDoesNotHavePermission(permission: string, roleId: string): EmbedBuilder {
+  return failureEmbed
+    .setTitle("Role already does not have permission")
+    .setDescription(`<@&${roleId}> already does not have permission ${permission}`)
+}
