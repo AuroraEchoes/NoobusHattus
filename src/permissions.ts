@@ -1,5 +1,6 @@
-import { CacheType, CommandInteraction, GuildMemberRoleManager } from "discord.js"
+import { CacheType, CommandInteraction, EmbedBuilder, GuildMemberRoleManager } from "discord.js"
 import { PermissionRoles } from "./db/permission-roles.js"
+import { failureEmbed } from "./lib/embeds.js"
 
 export enum Permission {
   USE_BOT,
@@ -27,7 +28,13 @@ export class PermissionManager {
         return true
       }
     }
-    interaction.reply(`You must have the ${permission.toString()} permission to do this`)
+    await interaction.reply({ embeds: [embed(permission.toString())], ephemeral: true });
     return false
   }
+}
+
+function embed(requiredPermission: string): EmbedBuilder {
+  return failureEmbed
+    .setTitle("Permisison missing")
+    .setDescription(`You must have permission ${requiredPermission} to do this`)
 }
