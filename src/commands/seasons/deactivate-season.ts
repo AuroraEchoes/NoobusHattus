@@ -1,7 +1,9 @@
 import { ApplicationCommandOptionType } from '@discordjs/core';
-import { Seasons } from '../../db/seasons.js';
+import { SeasonModel, Seasons } from '../../db/seasons.js';
 import type { Command } from '../index.js';
 import { Permission, PermissionManager } from '../../permissions.js';
+import { failureEmbed, successEmbed } from '../../lib/embeds.js';
+import { EmbedBuilder } from 'discord.js';
 
 export default {
   data: {
@@ -23,9 +25,27 @@ export default {
     const seasonId = interaction.options.getInteger("season-id")!
     const changedSeason = await Seasons.setActive(seasonId, false)
     if (changedSeason === undefined) {
-      await interaction.reply(`Nothing changed (either that season doesn’t exist, or was already deactivated)`);
+      await interaction.reply({ embeds: [embedFailure(seasonId)], ephemeral: true });
     } else {
-      await interaction.reply(`Deactivated Season ${changedSeason.season_name} (\`${changedSeason.id}\`)`);
+      await interaction.reply({ embeds: [embedSuccess(changedSeason)], ephemeral: true });
     }
   },
 } satisfies Command;
+
+function embedSuccess(season: SeasonModel): EmbedBuilder {
+  return successEmbed
+    .setTitle("Season deactivated")
+    .addFields([
+      { name: "Season Name", value: `${season.season_name}` },
+      { name: "Season ID", value: `${season.id}` }
+    ])
+}
+
+function embedFailure(seasonId: number): EmbedBuilder {
+  return failureEmbed
+    .setTitle("Could not deactivate season")
+    .setDescription(`Season could not be deactivated. Either it doesn’t exist, or was already inactive.`)
+    .setFields([
+      { name: "Season ID", value: `${seasonId}` }
+    ])
+}
