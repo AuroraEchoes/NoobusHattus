@@ -1,4 +1,5 @@
-import { bigint, boolean, foreignKey, integer, pgTable, primaryKey, varchar } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
+import { bigint, boolean, foreignKey, integer, pgTable, primaryKey, uniqueIndex, varchar } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   id: bigint({ mode: 'bigint' }).primaryKey().notNull().unique(),
@@ -8,15 +9,17 @@ export const users = pgTable("users", {
 
 export const seasons = pgTable("seasons", {
   id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
-  season_name: varchar({ length: 64 }),
+  season_name: varchar({ length: 64 }).notNull(),
+  guild_id: bigint({ mode: 'bigint' }).notNull(),
   is_active: boolean().default(false)
-})
+}, (table) => [uniqueIndex('single_active_season_per_guild').on(table.guild_id).where(sql`${table.is_active} = true`)])
 
 export const houses = pgTable("houses", {
   id: integer().primaryKey().generatedAlwaysAsIdentity().notNull(),
-  season_id: integer().references(() => seasons.id),
+  season_id: integer().references(() => seasons.id).notNull(),
   house_name: varchar({ length: 64 }).notNull(),
-  house_emoji: varchar({ length: 16 }).notNull()
+  house_emoji: varchar({ length: 16 }).notNull(),
+  house_role_id: bigint({ mode: 'bigint' })
 })
 
 export const user_houses = pgTable("user_houses", {
@@ -35,9 +38,8 @@ export const point_actions = pgTable("point_actions", {
 })
 
 export const log_channels = pgTable("log_channels", {
-  guild_id: bigint({ mode: 'bigint' }).notNull(),
+  guild_id: bigint({ mode: 'bigint' }).notNull().unique(),
   channel_id: bigint({ mode: 'bigint' }).notNull(),
-  season_id: bigint({ mode: 'bigint' }).references(() => seasons.id)
 }, (table) => [
   primaryKey({ columns: [table.guild_id, table.channel_id] })
 ])
@@ -50,7 +52,7 @@ export const logged_messages = pgTable("logged_messages", {
 }, (table) => [
   foreignKey({
     columns: [table.guild_id, table.channel_id],
-    foreignColumns: [log_channels.guild_id, log_channels.channel_id]
+    foreignColumns: [log_channels.guild_id, log_channels.channel_id],
   })
 ])
 

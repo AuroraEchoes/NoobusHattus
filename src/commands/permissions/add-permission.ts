@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, EmbedBuilder } from "discord.js";
+import { ApplicationCommandOptionType, EmbedBuilder, MessageFlags } from "discord.js";
 import type { Command } from '../index.js';
 import { Permission, PermissionManager } from "../../permissions.js";
 import { PermissionRoles } from "../../db/permission-roles.js";
@@ -35,14 +35,14 @@ export default {
       .map(role => role.role_id)
       .includes(BigInt(role.id))
     if (alreadyHasRole) {
-      await interaction.reply({ embeds: [embedAlreadyHasPermission(permission.toString(), role.id)], ephemeral: true });
+      await interaction.reply({ embeds: [embedAlreadyHasPermission(permission.toString(), role.id)], flags: MessageFlags.Ephemeral });
     }
     else {
       const res = await PermissionRoles.addPermissionToRole(permission, BigInt(role.id))
       if (res === undefined) {
-        await interaction.reply({ embeds: [embedFailure(permission.toString(), role.id)], ephemeral: true });
+        await interaction.reply({ embeds: [embedFailure(permission.toString(), role.id)], flags: MessageFlags.Ephemeral });
       } else {
-        await interaction.reply({ embeds: [embedSuccess(permission.toString(), role.id)], ephemeral: true });
+        await interaction.reply({ embeds: [embedSuccess(permission.toString(), role.id)], flags: MessageFlags.Ephemeral });
       }
     }
   },
@@ -52,16 +52,19 @@ function embedSuccess(permission: string, roleId: string): EmbedBuilder {
   return successEmbed
     .setTitle("Permission added to role")
     .setDescription(`<@&${roleId}> now has permission ${permission}`)
+    .setFields([])
 }
 
 function embedFailure(permission: string, roleId: string): EmbedBuilder {
   return failureEmbed
     .setTitle("Error adding role")
     .setDescription(`<@&${roleId}> was not successfully given permission ${permission}`)
+    .setFields([])
 }
 
 function embedAlreadyHasPermission(permission: string, roleId: string): EmbedBuilder {
   return failureEmbed
     .setTitle("Role already has permission")
     .setDescription(`<@&${roleId}> already has permission ${permission}`)
+    .setFields([])
 }

@@ -1,10 +1,11 @@
-import { CacheType, CommandInteraction, EmbedBuilder } from 'discord.js';
+import { CacheType, CommandInteraction, EmbedBuilder, MessageFlags } from 'discord.js';
 import { HouseModel, Houses } from '../../db/houses.js';
 import { SeasonModel, Seasons } from '../../db/seasons.js';
 import { Users } from '../../db/users.js';
 import type { Command } from '../index.js';
 import { Permission, PermissionManager } from '../../permissions.js';
 import { failureEmbed, successEmbed } from '../../lib/embeds.js';
+import { addHouseRole } from '../houses/house-utils.js';
 
 export default {
   data: {
@@ -17,77 +18,70 @@ export default {
 } satisfies Command;
 
 export async function sortUser(interaction: CommandInteraction<CacheType>, targetDiscordId: string) {
-  // Procedure:
-  // 1. Cache user (if not already cached)
-  // 2. Find active seasons
-  // 3. Choose a house for the user for *all* active seasons (we ASSUME this will be one)
-  // 4. Assign house, roles, etc. Notify user
-  // TODO: Add a role_id param to the house table so that can be assigned
-  // Ending a season should unassign all these roles, and we probably need
-  // some sort of admin command to mass-manage house roles (TBD)
   if (!PermissionManager.requirePermission(interaction, Permission.USE_BOT)) return
   const user = await Users.findOrCreate(BigInt(targetDiscordId));
+
   if (user === undefined) {
-    await interaction.reply({ embeds: [embedNoLinkedOzfAccount()], ephemeral: true });
+    await interaction.reply({ embeds: [embedNoLinkedOzfAccount()], flags: MessageFlags.Ephemeral });
     return
   }
 
-  let embeds = []
+  const guildId = BigInt(interaction.guildId!)
 
-  const activeSeasons = await Seasons.getActive()
-  if (activeSeasons.length === 0) {
-    await interaction.reply({ embeds: [embedNoActiveSeasons()], ephemeral: true });
+  const activeSeason = await Seasons.getActive(guildId)
+  if (activeSeason === undefined) {
+    await interaction.reply({ embeds: [embedNoActiveSeasons()], flags: MessageFlags.Ephemeral });
     return
   }
 
-  for (const activeSeason of activeSeasons) {
-    const house = await Houses.getByUserBySeason(user.id, activeSeason.id)
-    if (house === undefined) {
-      // TODO: Put user in a house
-      const newHouse = await Houses.getOrAssignForUser(user.id, activeSeason.id)
-      if (newHouse === undefined) {
-        embeds.push(embedNoHouses(activeSeason))
-      }
-      else {
-        embeds.push(embedSuccess(newHouse, activeSeason))
-      }
+  const curHouse = await Houses.getByUserBySeason(user.id, activeSeason.id)
+  if (curHouse === undefined) {
+    const newHouse = await Houses.getOrAssignForUser(user.id, activeSeason.id)
+    await addHouseRole(guildId, user.id)
+
+    if (newHouse === undefined) {
+      await interaction.reply({ embeds: [embedNoHouses(activeSeason)], flags: MessageFlags.Ephemeral });
     }
     else {
-      embeds.push(embedAlreadyInHouse(house, activeSeason))
+      await interaction.reply({ embeds: [embedSuccess(newHouse, activeSeason)], flags: MessageFlags.Ephemeral });
     }
   }
-  await interaction.reply({
-    embeds: embeds,
-    ephemeral: true
-  })
+  else {
+    await interaction.reply({ embeds: [embedAlreadyInHouse(curHouse, activeSeason)], flags: MessageFlags.Ephemeral });
+  }
 }
 
 function embedSuccess(house: HouseModel, season: SeasonModel): EmbedBuilder {
   return successEmbed
     .setTitle("The Sorting Hat has decided your fate")
     .setDescription(`You are now a member of **${house.house_emoji} ${house.house_name}** for ${season.season_name}. Do your house proud. Good luck!`)
+    .setFields([])
 }
 
 function embedNoHouses(season: SeasonModel): EmbedBuilder {
   return failureEmbed
     .setTitle("Could not sort")
     .setDescription(`Error sorting into a house for ${season.season_name} (\`${season.id}\`). Does this season have houses?`)
+    .setFields([])
 }
 
 function embedAlreadyInHouse(house: HouseModel, season: SeasonModel): EmbedBuilder {
   return failureEmbed
     .setTitle("Already in a house")
     .setDescription(`Already in **${house.house_emoji} ${house.house_name}** (\`${house.id}\`) for Season ${season.season_name} (\`${season.id}\`)`)
+    .setFields([])
 }
 
 function embedNoActiveSeasons(): EmbedBuilder {
   return failureEmbed
-    .setTitle("No active seasons")
-    .setDescription(`There are no active seasons.`)
+    .setTitle("No active season")
+    .setDescription(`There are no active season.`)
+    .setFields([])
 }
 
 function embedNoLinkedOzfAccount(): EmbedBuilder {
   return failureEmbed
     .setTitle("No linked \`ozfortress.com\` account")
     .setDescription(`You must link your Discord to your \`ozfortres.com\` account. Do this in Settings → Connections, then try again.`)
+    .setFields([])
 }

@@ -1,16 +1,15 @@
 import { and, eq, InferSelectModel } from "drizzle-orm";
-import { log_channels, summary_messages } from "./schema.js";
+import { summary_messages } from "./schema.js";
 import { db } from "../lib/db.js";
 
 export type SummaryMessageModel = InferSelectModel<typeof summary_messages>
 
 export class SummaryMessages {
-  static async getBySeasonByChannel(seasonId: number, guildId: bigint, channelId: bigint): Promise<SummaryMessageModel | undefined> {
-    const summaryMessages = await db.select()
+  static async getByGuildIdChannelId(guildId: bigint, channelId: bigint): Promise<SummaryMessageModel | undefined> {
+    const [summaryMessage] = await db.select()
       .from(summary_messages)
-      .leftJoin(log_channels, and(eq(log_channels.channel_id, summary_messages.channel_id), eq(log_channels.guild_id, summary_messages.guild_id)))
-      .where(and(eq(summary_messages.channel_id, channelId), eq(summary_messages.guild_id, guildId), eq(log_channels.season_id, BigInt(seasonId))))
-    return summaryMessages.length === 1 ? summaryMessages[0].summary_messages : undefined;
+      .where(and(eq(summary_messages.channel_id, channelId), eq(summary_messages.guild_id, guildId)))
+    return summaryMessage
   }
 
   static async createOrUpdateMessageId(guildId: bigint, channelId: bigint, messageId: bigint): Promise<SummaryMessageModel | undefined> {

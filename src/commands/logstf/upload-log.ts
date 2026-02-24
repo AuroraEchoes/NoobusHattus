@@ -1,4 +1,4 @@
-import { ApplicationCommandOptionType, EmbedBuilder } from 'discord.js';
+import { ApplicationCommandOptionType, EmbedBuilder, MessageFlags } from 'discord.js';
 import type { Command } from '../index.js';
 import { Permission, PermissionManager } from '../../permissions.js';
 import { LogsTfResponse } from './type-spec.js';
@@ -38,23 +38,25 @@ export default {
     const regex = /(?:https?:\/\/)?(?:logs\.tf\/)?(\d+).*/
     const result = logString.match(regex)
     if (result === null) {
-      await interaction.reply({ embeds: [(logLinkInvalidEmbed())], ephemeral: true });
+      await interaction.reply({ embeds: [(logLinkInvalidEmbed())], flags: MessageFlags.Ephemeral });
     }
     else {
       const logId = result[1]
       if (await ProcessedLogs.contains(BigInt(logId))) {
-        await interaction.reply({ embeds: [(logAlreadyProcessedEmbed(logId))], ephemeral: true });
+        await interaction.reply({ embeds: [(logAlreadyProcessedEmbed(logId))], flags: MessageFlags.Ephemeral });
       }
       else {
         const redCap = interaction.options.getUser("red-captain")!
         const bluCap = interaction.options.getUser("blu-captain")!
         const logsTfResponse = await queryLog(logId)
         if (logsTfResponse === undefined) {
-          await interaction.reply({ embeds: [logNotFoundEmbed(logId)], ephemeral: true });
+          await interaction.reply({ embeds: [logNotFoundEmbed(logId)], flags: MessageFlags.Ephemeral });
         }
         else {
-          LogAwards.applyAwards(logsTfResponse, BigInt(redCap.id), BigInt(bluCap.id))
-          await interaction.reply({ embeds: [embed(logId)], ephemeral: true });
+          const guildId = BigInt(interaction.guildId!)
+          LogAwards.applyAwards(guildId, logsTfResponse, BigInt(redCap.id), BigInt(bluCap.id))
+          await ProcessedLogs.add(BigInt(logId))
+          await interaction.reply({ embeds: [embed(logId)], flags: MessageFlags.Ephemeral });
         }
       }
     }
@@ -77,7 +79,7 @@ async function queryLog(logId: string): Promise<undefined | LogsTfResponse> {
 function embed(logId: string): EmbedBuilder {
   return successEmbed
     .setTitle("Log successfully processed")
-    .addFields([
+    .setFields([
       { name: "Log ID", value: `\`${logId}\``, inline: true },
     ])
 }
@@ -86,7 +88,7 @@ function logNotFoundEmbed(logId: string): EmbedBuilder {
   return failureEmbed
     .setTitle("Log not found")
     .setDescription("Did you enter the right ID/URL?")
-    .addFields([
+    .setFields([
       { name: "Log ID", value: `\`${logId}\``, inline: true },
     ])
 }
@@ -95,12 +97,13 @@ function logLinkInvalidEmbed(): EmbedBuilder {
   return failureEmbed
     .setTitle("Log format invalid")
     .setDescription("Please upload either the link (i.e. `https://logs.tf/LOG_ID`) or the log (i.e. `LOG_ID`")
+    .setFields([])
 }
 
 function logAlreadyProcessedEmbed(logId: string): EmbedBuilder {
   return failureEmbed
     .setTitle("Log already processed")
-    .addFields([
+    .setFields([
       { name: "Log ID", value: `\`${logId}\``, inline: true },
     ])
 

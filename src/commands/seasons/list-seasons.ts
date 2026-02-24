@@ -1,4 +1,4 @@
-import { EmbedBuilder } from 'discord.js';
+import { EmbedBuilder, MessageFlags } from 'discord.js';
 import { SeasonModel, Seasons } from '../../db/seasons.js';
 import { Permission, PermissionManager } from '../../permissions.js';
 import type { Command } from '../index.js';
@@ -12,12 +12,15 @@ export default {
 
   async execute(interaction) {
     if (!PermissionManager.requirePermission(interaction, Permission.MANAGE_BOT)) return
-    const allSeasons = await Seasons.get()
+    const guildId = BigInt(interaction.guildId!)
+    const allSeasons = await Seasons.getByGuild(guildId)
+
     if (allSeasons.length === 0) {
-      await interaction.reply({ embeds: [embedNoSeasons()], ephemeral: true });
+      await interaction.reply({ embeds: [embedNoSeasons()], flags: MessageFlags.Ephemeral });
     }
+
     else {
-      await interaction.reply({ embeds: [embedSuccess(allSeasons)], ephemeral: true });
+      await interaction.reply({ embeds: [embedSuccess(allSeasons)], flags: MessageFlags.Ephemeral });
     }
   },
 } satisfies Command;
@@ -26,10 +29,12 @@ function embedSuccess(seasons: SeasonModel[]): EmbedBuilder {
   return successEmbed
     .setTitle("Season list")
     .setDescription(seasons.map((season, _) => `\`${season.id}\` ${season.season_name}: \`${season.is_active ? "ACTIVE" : "INACTIVE"}\``).join("\n"))
+    .setFields([])
 }
 
 function embedNoSeasons(): EmbedBuilder {
   return successEmbed
     .setTitle("No seasons")
     .setDescription(`There are no seasons. Create one using \`/create-season\``)
+    .setFields([])
 }

@@ -2,7 +2,7 @@ import { ApplicationCommandOptionType } from '@discordjs/core';
 import type { Command } from '../index.js';
 import { HouseModel, Houses } from '../../db/houses.js';
 import { Permission, PermissionManager } from '../../permissions.js';
-import { EmbedBuilder } from 'discord.js';
+import { EmbedBuilder, MessageFlags } from 'discord.js';
 import { successEmbed } from '../../lib/embeds.js';
 
 export default {
@@ -28,6 +28,12 @@ export default {
         description: "House emoji (or prefix)",
         required: true,
       },
+      {
+        type: ApplicationCommandOptionType.Role,
+        name: "house-role",
+        description: "Role to automatically apply to all house members",
+        required: false
+      }
     ]
   },
 
@@ -37,15 +43,17 @@ export default {
     const seasonId = interaction.options.getInteger("season-id")!
     const houseName = interaction.options.getString("house-name")!
     const houseEmoji = interaction.options.getString("house-emoji")!
-    const house = await Houses.create(seasonId, houseName, houseEmoji)
-    await interaction.reply({ embeds: [embed(house)], ephemeral: true });
+    const houseRoleOpt = interaction.options.getRole("house-role")?.id
+    const houseRole = houseRoleOpt ? BigInt(houseRoleOpt) : undefined
+    const house = await Houses.create(seasonId, houseName, houseEmoji, houseRole)
+    await interaction.reply({ embeds: [embed(house)], flags: MessageFlags.Ephemeral });
   },
 } satisfies Command;
 
 function embed(house: HouseModel): EmbedBuilder {
   return successEmbed
     .setTitle("House Successfully Created")
-    .addFields([
+    .setFields([
       { name: "House Name", value: `\`${house.house_name}\``, inline: true },
       { name: "House ID", value: `\`${house.id}\``, inline: true }
     ])

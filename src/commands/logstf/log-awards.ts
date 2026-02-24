@@ -66,11 +66,11 @@ const playMedAward = {
 
 export class LogAwards {
   static awardCategories = [captainTeamAward, winPugAward, playMedAward]
-  static async applyAwards(log: LogsTfResponse, redCapDiscord: bigint, bluCapDiscord: bigint) {
+  static async applyAwards(guildId: bigint, log: LogsTfResponse, redCapDiscord: bigint, bluCapDiscord: bigint) {
     for (const award of this.awardCategories) {
       const eligibleUsers = await award.eligibleUserIds(log, redCapDiscord, bluCapDiscord)
       for (const userId of eligibleUsers) {
-        ActionManager.applyActionAsSystem(userId, award.reason, award.pointValue)
+        ActionManager.applyActionAsSystem(guildId, userId, award.reason, award.pointValue)
       }
     }
   }

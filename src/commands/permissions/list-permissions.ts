@@ -2,7 +2,7 @@ import type { Command } from '../index.js';
 import { Permission, PermissionManager } from "../../permissions.js";
 import { PermissionRoles } from "../../db/permission-roles.js";
 import { successEmbed } from '../../lib/embeds.js';
-import { EmbedBuilder } from 'discord.js';
+import { EmbedBuilder, MessageFlags } from 'discord.js';
 
 export default {
   data: {
@@ -20,14 +20,14 @@ export default {
       const rolesWithPermission = await PermissionRoles.getRolesWithPermission(permission as unknown as Permission)
       map.set(permission, Array.from(rolesWithPermission.map((val, _) => val.role_id).filter(x => x !== null)))
     }
-    await interaction.reply({ embeds: [embedSuccess(map)], ephemeral: true });
+    await interaction.reply({ embeds: [embedSuccess(map)], flags: MessageFlags.Ephemeral });
   },
 } satisfies Command;
 
 function embedSuccess(permissions: Map<string, bigint[]>): EmbedBuilder {
   return successEmbed
     .setTitle("Permissions List")
-    .addFields(
+    .setFields(
       Array.from(permissions.entries()).map(([key, roles]) => ({
         name: key,
         value: roles.map(role => `<@&${role}>`).join(", ") || "None"

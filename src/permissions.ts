@@ -1,4 +1,4 @@
-import { CacheType, CommandInteraction, EmbedBuilder, GuildMemberRoleManager } from "discord.js"
+import { CacheType, CommandInteraction, EmbedBuilder, GuildMemberRoleManager, MessageFlags } from "discord.js"
 import { PermissionRoles } from "./db/permission-roles.js"
 import { failureEmbed } from "./lib/embeds.js"
 
@@ -28,7 +28,7 @@ export class PermissionManager {
         return true
       }
     }
-    await interaction.reply({ embeds: [embed(permission.toString())], ephemeral: true });
+    await interaction.reply({ embeds: [embed(permission.toString())], flags: MessageFlags.Ephemeral });
     return false
   }
 }
