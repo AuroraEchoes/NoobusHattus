@@ -35,6 +35,6 @@ export class PermissionManager {
 
 function embed(requiredPermission: string): EmbedBuilder {
   return failureEmbed
-    .setTitle("Permisison missing")
+    .setTitle("Permission missing")
     .setDescription(`You must have permission ${requiredPermission} to do this`)
 }

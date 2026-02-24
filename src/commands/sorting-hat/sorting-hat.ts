@@ -1,9 +1,10 @@
-import { CacheType, CommandInteraction } from 'discord.js';
-import { Houses } from '../../db/houses.js';
-import { Seasons } from '../../db/seasons.js';
+import { CacheType, CommandInteraction, EmbedBuilder } from 'discord.js';
+import { HouseModel, Houses } from '../../db/houses.js';
+import { SeasonModel, Seasons } from '../../db/seasons.js';
 import { Users } from '../../db/users.js';
 import type { Command } from '../index.js';
 import { Permission, PermissionManager } from '../../permissions.js';
+import { failureEmbed, successEmbed } from '../../lib/embeds.js';
 
 export default {
   data: {
@@ -31,30 +32,56 @@ export async function sortUser(interaction: CommandInteraction<CacheType>, targe
     return
   }
 
-  let replyBuf = []
+  let embeds = []
 
   const activeSeasons = await Seasons.getActive()
   if (activeSeasons.length === 0) {
-    interaction.reply("There are no active seasons at the moment")
+    await interaction.reply({ embeds: [embedNoActiveSeasons()], ephemeral: true });
     return
   }
+
   for (const activeSeason of activeSeasons) {
     const house = await Houses.getByUserBySeason(user.id, activeSeason.id)
     if (house === undefined) {
       // TODO: Put user in a house
       const newHouse = await Houses.getOrAssignForUser(user.id, activeSeason.id)
       if (newHouse === undefined) {
-        replyBuf.push(`Error adding a house for Season ${activeSeason.season_name} (\`${activeSeason.id}\`). Does this season have houses?`)
+        embeds.push(embedNoHouses(activeSeason))
       }
       else {
-        replyBuf.push(`Added to House ${newHouse.house_emoji} ${newHouse.house_name} (\`${newHouse.id}\`) for Season ${activeSeason.season_name} (\`${activeSeason.id}\`)`)
+        embeds.push(embedSuccess(newHouse, activeSeason))
       }
     }
     else {
-      replyBuf.push(`Already in House ${house.house_emoji} ${house.house_name} (\`${house.id}\`) for Season ${activeSeason.season_name} (\`${activeSeason.id}\`)`)
+      embeds.push(embedAlreadyInHouse(house, activeSeason))
     }
   }
-  interaction.reply({
-    content: replyBuf.join("\n")
+  await interaction.reply({
+    embeds: embeds,
+    ephemeral: true
   })
+}
+
+function embedSuccess(house: HouseModel, season: SeasonModel): EmbedBuilder {
+  return successEmbed
+    .setTitle("The Sorting Hat has decided your fate")
+    .setDescription(`You are now a member of **${house.house_emoji} ${house.house_name}** for ${season.season_name}. Do your house proud. Good luck!`)
+}
+
+function embedNoHouses(season: SeasonModel): EmbedBuilder {
+  return failureEmbed
+    .setTitle("Could not sort")
+    .setDescription(`Error sorting into a house for ${season.season_name} (\`${season.id}\`). Does this season have houses?`)
+}
+
+function embedAlreadyInHouse(house: HouseModel, season: SeasonModel): EmbedBuilder {
+  return failureEmbed
+    .setTitle("Already in a house")
+    .setDescription(`Already in **${house.house_emoji} ${house.house_name}** (\`${house.id}\`) for Season ${season.season_name} (\`${season.id}\`)`)
+}
+
+function embedNoActiveSeasons(): EmbedBuilder {
+  return failureEmbed
+    .setTitle("No active seasons")
+    .setDescription(`There are no active seasons.`)
 }
