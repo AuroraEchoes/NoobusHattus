@@ -2,6 +2,9 @@ import process from 'node:process';
 import { URL } from 'node:url';
 import { loadEvents } from './util/loaders.js';
 import { client } from './client.js';
+import dotenv from 'dotenv';
+
+dotenv.config()
 
 // Load the events and commands
 const events = await loadEvents(new URL('events/', import.meta.url));
