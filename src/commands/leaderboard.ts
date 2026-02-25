@@ -53,24 +53,32 @@ async function embedHouseLeaderboard(seasonId: number): Promise<EmbedBuilder> {
   const points = await PointActions.getPointTotalsBySeason(seasonId)
   const sortedPoints = points.sort((a, b) => a.points! - b.points!)
   const houses = await Houses.getBySeason(seasonId)
+  let description = sortedPoints.map((x, idx) => {
+    const house = houses.find(h => h.id === x.house_id)
+    return `**#${idx + 1}**: ${house?.house_emoji} ${house?.house_name} (${x.points} points)`
+  }).join("\n")
+  if (description.length === 0) {
+    description = "*No points awarded*"
+  }
   return successEmbed
     .setTitle("House Leaderboard")
-    .setDescription(sortedPoints.map((x, idx) => {
-      const house = houses.find(h => h.id === x.house_id)
-      return `**#${idx + 1}**: ${house?.house_emoji} ${house?.house_name} (${x.points} points)`
-    }).join("\n"))
+    .setDescription(description)
 }
 
 async function embedHouseIndividual(seasonId: number): Promise<EmbedBuilder> {
   const points = await PointActions.getPointLeaderboardIndividual(seasonId, 10)
   const sortedPoints = points.sort((a, b) => a.points! - b.points!)
   const users = await Promise.all(sortedPoints.map(async (pts, _) => await Users.getById(pts.user_id!)))
+  let description = sortedPoints.map((x, idx) => {
+    const user = users.find(u => u?.id === x.user_id)
+    return `**#${idx + 1}**: <@${user?.discord_id}> (${x.points} points)`
+  }).join("\n")
+  if (description.length === 0) {
+    description = "*No points awarded*"
+  }
   return successEmbed
     .setTitle("House Leaderboard")
-    .setDescription(sortedPoints.map((x, idx) => {
-      const user = users.find(u => u?.id === x.user_id)
-      return `**#${idx + 1}**: <@${user?.discord_id}> (${x.points} points)`
-    }).join("\n"))
+    .setDescription(description)
 }
 
 function embedNoActiveSeasons(): EmbedBuilder {
