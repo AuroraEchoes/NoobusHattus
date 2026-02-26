@@ -2,33 +2,24 @@ import type { Command } from '../index.js';
 import { LogChannelModel, LogChannels } from '../../db/log-channels.js';
 import { Permission, PermissionManager } from '../../permissions.js';
 import { failureEmbed, successEmbed } from '../../lib/embeds.js';
-import { ApplicationCommandOptionType, EmbedBuilder, MessageFlags } from 'discord.js';
+import { EmbedBuilder, MessageFlags } from 'discord.js';
 
 export default {
   data: {
     name: "remove-log-channel",
-    description: "Remove channel as a log channel (will use current channel if a channel is not provided)",
-    options: [
-      {
-        type: ApplicationCommandOptionType.Channel,
-        name: "channel",
-        description: "Target channel",
-        required: false,
-      }
-    ]
+    description: "Remove log channel",
   },
 
   async execute(interaction) {
     if (!PermissionManager.requirePermission(interaction, Permission.MANAGE_BOT)) return
     if (!interaction.isChatInputCommand()) return;
-    const channelParam = interaction.options.getChannel("channel")
-    const channelId = channelParam === null ? BigInt(interaction.channelId) : BigInt(channelParam.id)
     const guildId = BigInt(interaction.guildId!);
-    const logChannel = await LogChannels.delete(channelId, guildId)
+    const logChannel = await LogChannels.getByGuild(guildId)
     if (logChannel === undefined) {
-      await interaction.reply({ embeds: [embedFailure(channelId)], flags: MessageFlags.Ephemeral })
+      await interaction.reply({ embeds: [embedFailure()], flags: MessageFlags.Ephemeral })
       return
     }
+    await LogChannels.delete(logChannel.channel_id, logChannel.guild_id)
     await interaction.reply({ embeds: [embedSuccess(logChannel)], flags: MessageFlags.Ephemeral })
   },
 } satisfies Command;
@@ -41,9 +32,9 @@ function embedSuccess(logChannel: LogChannelModel): EmbedBuilder {
     .setFields([])
 }
 
-function embedFailure(channelId: bigint): EmbedBuilder {
+function embedFailure(): EmbedBuilder {
   return failureEmbed
-    .setTitle("Failed to remove Log Channel")
-    .setDescription(`<#${channelId}> is likely not a log channel`)
+    .setTitle("No log channel found")
+    .setDescription(`This server does not have a log channel setup. Use /query-log-channel to query the log channel.`)
     .setFields([])
 }
