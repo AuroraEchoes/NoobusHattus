@@ -35,6 +35,7 @@ export default {
     if (!PermissionManager.requirePermission(interaction, Permission.UPLOAD_LOGS)) return
     if (!interaction.isChatInputCommand()) return
     const logString = interaction.options.getString("log")!
+    const userId = BigInt(interaction.user.id)
     const regex = /(?:https?:\/\/)?(?:logs\.tf\/)?(\d+).*/
     const result = logString.match(regex)
     if (result === null) {
@@ -56,7 +57,7 @@ export default {
           const guildId = BigInt(interaction.guildId!)
           LogAwards.applyAwards(guildId, logsTfResponse, BigInt(redCap.id), BigInt(bluCap.id))
           await ProcessedLogs.add(BigInt(logId))
-          await interaction.reply({ embeds: [embed(logId)], flags: MessageFlags.Ephemeral });
+          await interaction.reply({ embeds: [embed(userId, logId)] });
         }
       }
     }
@@ -76,11 +77,12 @@ async function queryLog(logId: string): Promise<undefined | LogsTfResponse> {
   }
 }
 
-function embed(logId: string): EmbedBuilder {
+function embed(userId: BigInt, logId: string): EmbedBuilder {
   return successEmbed
     .setTitle("Log successfully processed")
     .setDescription(" ")
     .setFields([
+      { name: "Uploader", value: `\`${userId}\``, inline: true },
       { name: "Log ID", value: `\`${logId}\``, inline: true },
     ])
 }
