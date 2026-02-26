@@ -82,7 +82,7 @@ function embed(userId: BigInt, logId: string): EmbedBuilder {
     .setTitle("Log successfully processed")
     .setDescription(" ")
     .setFields([
-      { name: "Uploader", value: `\`${userId}\``, inline: true },
+      { name: "Uploader", value: `<@${userId}>`, inline: true },
       { name: "Log ID", value: `\`${logId}\``, inline: true },
     ])
 }
