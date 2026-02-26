@@ -43,7 +43,7 @@ export async function sortUser(interaction: CommandInteraction<CacheType>, targe
       await interaction.reply({ embeds: [embedNoHouses(activeSeason)], flags: MessageFlags.Ephemeral });
     }
     else {
-      await interaction.reply({ embeds: [embedSuccess(newHouse, activeSeason)], flags: MessageFlags.Ephemeral });
+      await interaction.reply({ embeds: [embedSuccess(BigInt(targetDiscordId), newHouse, activeSeason)] });
     }
   }
   else {
@@ -51,10 +51,10 @@ export async function sortUser(interaction: CommandInteraction<CacheType>, targe
   }
 }
 
-function embedSuccess(house: HouseModel, season: SeasonModel): EmbedBuilder {
+function embedSuccess(discordId: bigint, house: HouseModel, season: SeasonModel): EmbedBuilder {
   return successEmbed
     .setTitle("The Sorting Hat has decided your fate")
-    .setDescription(`You are now a member of **${house.house_emoji} ${house.house_name}** for ${season.season_name}. Do your house proud. Good luck!`)
+    .setDescription(`<@${discordId}>, you are now a member of **${house.house_emoji} ${house.house_name}** for ${season.season_name}. Do your house proud. Good luck!`)
     .setFields([])
 }
 
