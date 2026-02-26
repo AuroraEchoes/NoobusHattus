@@ -79,6 +79,7 @@ async function queryLog(logId: string): Promise<undefined | LogsTfResponse> {
 function embed(logId: string): EmbedBuilder {
   return successEmbed
     .setTitle("Log successfully processed")
+    .setDescription("")
     .setFields([
       { name: "Log ID", value: `\`${logId}\``, inline: true },
     ])
@@ -103,6 +104,7 @@ function logLinkInvalidEmbed(): EmbedBuilder {
 function logAlreadyProcessedEmbed(logId: string): EmbedBuilder {
   return failureEmbed
     .setTitle("Log already processed")
+    .setDescription("")
     .setFields([
       { name: "Log ID", value: `\`${logId}\``, inline: true },
     ])
