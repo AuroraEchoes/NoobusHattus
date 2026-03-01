@@ -12,8 +12,9 @@ export enum Permission {
 export class PermissionManager {
   static async requirePermission(interaction: CommandInteraction<CacheType>, permission: Permission): Promise<boolean> {
     // Short-circuit admins, so someone can set it up initially
-    if (interaction.memberPermissions?.serialize().Administrator)
+    if (interaction.memberPermissions?.serialize().Administrator) {
       return true
+    }
     const requiredRoles = (await PermissionRoles.getRolesWithPermission(permission))
       .map((role, _) => role.role_id)
     let roles = interaction.member?.roles
@@ -23,18 +24,20 @@ export class PermissionManager {
     else if (roles instanceof GuildMemberRoleManager) {
       roles = roles.cache.map((val, _) => val.id)
     }
+
     for (const role of roles) {
-      if (requiredRoles.includes(BigInt(role)) !== undefined) {
+      if (requiredRoles.includes(BigInt(role))) {
         return true
       }
     }
-    await interaction.reply({ embeds: [embed(permission.toString())], flags: MessageFlags.Ephemeral });
+    await interaction.reply({ embeds: [embed(permission)], flags: MessageFlags.Ephemeral });
     return false
   }
 }
 
-function embed(requiredPermission: string): EmbedBuilder {
+function embed(requiredPermission: Permission): EmbedBuilder {
   return failureEmbed
     .setTitle("Permission missing")
-    .setDescription(`You must have permission ${requiredPermission} to do this`)
+    .setDescription(`You must have permission ${Permission[requiredPermission]} to do this`)
+    .setFields([])
 }

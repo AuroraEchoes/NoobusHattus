@@ -27,6 +27,7 @@ export default {
 function embedSuccess(permissions: Map<string, bigint[]>): EmbedBuilder {
   return successEmbed
     .setTitle("Permissions List")
+    .setDescription(" ")
     .setFields(
       Array.from(permissions.entries()).map(([key, roles]) => ({
         name: key,
