@@ -29,7 +29,7 @@ export default {
   },
 
   async execute(interaction) {
-    if (!PermissionManager.requirePermission(interaction, Permission.MANAGE_BOT)) return
+    if (!(await PermissionManager.requirePermission(interaction, Permission.MANAGE_BOT))) return
     if (!interaction.isChatInputCommand()) return;
     if (!hasAssignRolePermission(BigInt(interaction.guildId!))) {
       await interaction.reply({ embeds: [couldNotAssignRoleEmbed], flags: MessageFlags.Ephemeral });

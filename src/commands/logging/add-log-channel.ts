@@ -20,7 +20,7 @@ export default {
   },
 
   async execute(interaction) {
-    if (!PermissionManager.requirePermission(interaction, Permission.MANAGE_BOT)) return
+    if (!(await PermissionManager.requirePermission(interaction, Permission.MANAGE_BOT))) return
     if (!interaction.isChatInputCommand()) return;
     const channelParam = interaction.options.getChannel("channel")
     const channelId = channelParam === null ? BigInt(interaction.channelId) : BigInt(channelParam.id)

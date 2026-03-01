@@ -32,7 +32,7 @@ export default {
     ]
   },
   async execute(interaction) {
-    if (!PermissionManager.requirePermission(interaction, Permission.UPLOAD_LOGS)) return
+    if (!(await PermissionManager.requirePermission(interaction, Permission.UPLOAD_LOGS))) return
     if (!interaction.isChatInputCommand()) return
     const logString = interaction.options.getString("log")!
     const userId = BigInt(interaction.user.id)

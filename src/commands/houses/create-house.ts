@@ -38,7 +38,7 @@ export default {
   },
 
   async execute(interaction) {
-    if (!PermissionManager.requirePermission(interaction, Permission.MANAGE_BOT)) return
+    if (!(await PermissionManager.requirePermission(interaction, Permission.MANAGE_BOT))) return
     if (!interaction.isChatInputCommand()) return;
     const seasonId = interaction.options.getInteger("season-id")!
     const houseName = interaction.options.getString("house-name")!

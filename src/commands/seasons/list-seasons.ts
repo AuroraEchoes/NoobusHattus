@@ -11,7 +11,7 @@ export default {
   },
 
   async execute(interaction) {
-    if (!PermissionManager.requirePermission(interaction, Permission.MANAGE_BOT)) return
+    if (!(await PermissionManager.requirePermission(interaction, Permission.MANAGE_BOT))) return
     const guildId = BigInt(interaction.guildId!)
     const allSeasons = await Seasons.getByGuild(guildId)
 

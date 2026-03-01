@@ -30,7 +30,7 @@ export default {
   },
 
   async execute(interaction) {
-    if (!PermissionManager.requirePermission(interaction, Permission.USE_BOT)) return
+    if (!(await PermissionManager.requirePermission(interaction, Permission.USE_BOT))) return
     if (!interaction.isChatInputCommand()) return;
 
     const guildId = BigInt(interaction.guildId!)

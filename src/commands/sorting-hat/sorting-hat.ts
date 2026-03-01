@@ -18,7 +18,7 @@ export default {
 } satisfies Command;
 
 export async function sortUser(interaction: CommandInteraction<CacheType>, targetDiscordId: string) {
-  if (!PermissionManager.requirePermission(interaction, Permission.USE_BOT)) return
+  if (!(await PermissionManager.requirePermission(interaction, Permission.USE_BOT))) return
   const user = await Users.findOrCreate(BigInt(targetDiscordId));
 
   if (user === undefined) {

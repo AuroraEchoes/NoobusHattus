@@ -11,7 +11,7 @@ export default {
   },
 
   async execute(interaction) {
-    if (!PermissionManager.requirePermission(interaction, Permission.MANAGE_BOT)) return
+    if (!(await PermissionManager.requirePermission(interaction, Permission.MANAGE_BOT))) return
     if (!interaction.isChatInputCommand()) return;
 
     const permissionNames = Object.values(Permission).filter(val => typeof val === "string")

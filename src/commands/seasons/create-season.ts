@@ -19,7 +19,7 @@ export default {
   },
 
   async execute(interaction) {
-    if (!PermissionManager.requirePermission(interaction, Permission.MANAGE_BOT)) return
+    if (!(await PermissionManager.requirePermission(interaction, Permission.MANAGE_BOT))) return
     if (!interaction.isChatInputCommand()) return;
     const seasonName = interaction.options.getString("season-name")!
     const guildId = BigInt(interaction.guildId!)

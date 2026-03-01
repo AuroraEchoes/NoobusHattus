@@ -32,7 +32,7 @@ export default {
   },
 
   async execute(interaction) {
-    if (!PermissionManager.requirePermission(interaction, Permission.AWARD_POINTS)) return
+    if (!(await PermissionManager.requirePermission(interaction, Permission.AWARD_POINTS))) return
 
     if (!interaction.isChatInputCommand()) return;
     const target = BigInt(interaction.options.getUser("target")!.id)
