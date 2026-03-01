@@ -60,7 +60,7 @@ export class Houses {
     const userHouses = await db.select()
       .from(houses)
       .leftJoin(user_houses, eq(houses.id, user_houses.house_id))
-      .where(eq(user_houses.user_id, userId))
+      .where(and(eq(user_houses.user_id, userId), eq(houses.season_id, seasonId)))
 
     if (userHouses.length > 0) {
       // We assume that a user can only be in one house per season
