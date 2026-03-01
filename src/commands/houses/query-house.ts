@@ -47,27 +47,27 @@ export default {
 function embed(targetDiscordId: BigInt, house: HouseModel, season: SeasonModel): EmbedBuilder {
   return successEmbed
     .setTitle(`User is in **${house.house_emoji} ${house.house_name}**`)
-    .setDescription(`@<${targetDiscordId}> is in **${house.house_emoji} ${house.house_name}** for ${season.season_name}`)
+    .setDescription(`<@${targetDiscordId}> is in **${house.house_emoji} ${house.house_name}** for ${season.season_name}`)
     .setFields([])
 }
 
 function embedNoActiveSeasons(targetDiscordId: BigInt): EmbedBuilder {
   return failureEmbed
     .setTitle("No active season")
-    .setDescription(`@<${targetDiscordId}> is not in a house as there are no active seasons`)
+    .setDescription(`<@${targetDiscordId}> is not in a house as there are no active seasons`)
     .setFields([])
 }
 
 function embedNotInHouse(targetDiscordId: BigInt, season: SeasonModel): EmbedBuilder {
   return failureEmbed
     .setTitle("Not in a house")
-    .setDescription(`@<${targetDiscordId}> is not in a house for ${season.season_name}`)
+    .setDescription(`<@${targetDiscordId}> is not in a house for ${season.season_name}`)
     .setFields([])
 }
 
 function embedUserDoesNotExist(targetDiscordId: BigInt): EmbedBuilder {
   return failureEmbed
     .setTitle("User not registered")
-    .setDescription(`@<${targetDiscordId}> is not registered with the bot.`)
+    .setDescription(`<@${targetDiscordId}> is not registered with the bot.`)
     .setFields([])
 }
