@@ -29,7 +29,7 @@ export default {
 function embed(houses: HouseModel[]): EmbedBuilder {
   return successEmbed
     .setTitle("House List")
-    .setDescription(houses.map((house, _) => `**${house.house_emoji} ${house.house_name}**: ID: \`${house.id}\`, Season ID: \`${house.season_id}\``).join("\n"))
+    .setDescription(houses.map((house, _) => `**${house.house_emoji} ${house.house_name}**: ID: \`${house.id}\`, Season ID: \`${house.season_id}\`, Role: <@&${house.house_role_id}>`).join("\n"))
     .setFields([])
 }
 
