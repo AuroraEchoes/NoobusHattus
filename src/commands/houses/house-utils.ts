@@ -34,17 +34,17 @@ export async function userAddRole(guildId: bigint, discordId: bigint, roleId: bi
 }
 
 export async function userRemoveRole(guildId: bigint, discordId: bigint, roleId: bigint): Promise<boolean> {
-  const guild = await client.guilds.fetch(guildId.toString())
-  const member = await guild.members.fetch(discordId.toString())
-  const role = await guild.roles.fetch(roleId.toString())
-
-  if (guild === null || member === null || role === null) return false
-  if (!member.roles.cache.has(role.id)) return false
   try {
+    const guild = await client.guilds.fetch(guildId.toString())
+    const member = await guild.members.fetch(discordId.toString())
+    const role = await guild.roles.fetch(roleId.toString())
+
+    if (guild === null || member === null || role === null) return false
+    if (!member.roles.cache.has(role.id)) return false
     await member.roles.remove(role)
     return true
   } catch (error) {
-    console.error(`ERR: Could not assign role. ${error}.`)
+    console.error(`ERR: Could not remove role. ${error}.`)
     return false
   }
 }
