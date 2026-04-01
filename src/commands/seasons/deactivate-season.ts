@@ -43,7 +43,7 @@ export default {
 function embedSuccess(season: SeasonModel): EmbedBuilder {
   return successEmbed
     .setTitle("Season deactivated")
-    .setDescription("")
+    .setDescription(" ")
     .setFields([
       { name: "Season Name", value: `${season.season_name}` },
       { name: "Season ID", value: `${season.id}` }
