@@ -30,8 +30,63 @@ const winPugAward = {
     else {
       const eligibleUsers = []
       const redWon = redScore > bluScore
+      const bluWon = bluScore > redScore
       for (const [steamId3, player] of Object.entries(log!.players)) {
-        const playerWon = (redWon && player.team === "Red") || (!redWon && player.team === "Blue")
+        const playerWon = (redWon && player.team === "Red") || (bluWon && player.team === "Blue")
+        if (playerWon) {
+          const steamId = id3ToId64(steamId3)
+          const user = await Users.getBySteamId(steamId)
+          if (user !== undefined) {
+            eligibleUsers.push(user.id)
+          }
+        }
+      }
+      return eligibleUsers
+    }
+  },
+} satisfies LogAwardCategory
+
+const drawPugAward = {
+  pointValue: 3,
+  reason: "Drew a pug",
+  async eligibleUserIds(log) {
+    const redScore = log!.teams.Red.score
+    const bluScore = log!.teams.Blue.score
+    if (redScore === bluScore) {
+      return []
+    }
+    else {
+      const eligibleUsers = []
+      const isDraw = redScore === bluScore
+      if (isDraw) {
+        for (const [steamId3, _] of Object.entries(log!.players)) {
+          const steamId = id3ToId64(steamId3)
+          const user = await Users.getBySteamId(steamId)
+          if (user !== undefined) {
+            eligibleUsers.push(user.id)
+          }
+        }
+      }
+      return eligibleUsers
+    }
+  },
+} satisfies LogAwardCategory
+
+const playPugAward = {
+  pointValue: 1,
+  reason: "Played a pug",
+  async eligibleUserIds(log) {
+    const redScore = log!.teams.Red.score
+    const bluScore = log!.teams.Blue.score
+    if (redScore === bluScore) {
+      return []
+    }
+    else {
+      const eligibleUsers = []
+      const redWon = redScore > bluScore
+      const bluWon = bluScore > redScore
+      for (const [steamId3, player] of Object.entries(log!.players)) {
+        const playerWon = (redWon && player.team === "Blue") || (bluWon && player.team === "Red")
         if (playerWon) {
           const steamId = id3ToId64(steamId3)
           const user = await Users.getBySteamId(steamId)
@@ -65,7 +120,7 @@ const playMedAward = {
 } satisfies LogAwardCategory
 
 export class LogAwards {
-  static awardCategories = [captainTeamAward, winPugAward, playMedAward]
+  static awardCategories = [captainTeamAward, winPugAward, drawPugAward, playPugAward, playMedAward]
   static async applyAwards(guildId: bigint, log: LogsTfResponse, redCapDiscord: bigint, bluCapDiscord: bigint) {
     for (const award of this.awardCategories) {
       const eligibleUsers = await award.eligibleUserIds(log, redCapDiscord, bluCapDiscord)

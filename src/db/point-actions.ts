@@ -41,4 +41,20 @@ export class PointActions {
       .limit(limit)
     return pointTotals
   }
+
+  static async getPointLeaderboardIndividualByHouse(houseId: number, limit: number): Promise<{ user_id: bigint | null, points: number }[]> {
+    const pointTotals = await db.select(
+      {
+        user_id: users.id,
+        points: sql<number>`SUM(${point_actions.point_value})::int`
+      })
+      .from(point_actions)
+      .leftJoin(houses, eq(point_actions.house_id, houses.id))
+      .leftJoin(users, eq(point_actions.target_id, users.id))
+      .where(eq(houses.id, houseId))
+      .groupBy(users.id)
+      .orderBy(desc(sql`SUM(${point_actions.point_value})::int`))
+      .limit(limit)
+    return pointTotals
+  }
 }

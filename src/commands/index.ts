@@ -1,4 +1,4 @@
-import type { RESTPostAPIApplicationCommandsJSONBody, CommandInteraction } from 'discord.js';
+import type { RESTPostAPIApplicationCommandsJSONBody, CommandInteraction, AutocompleteInteraction } from 'discord.js';
 import { z } from 'zod';
 import type { StructurePredicate } from '../util/loaders.js';
 
@@ -16,6 +16,7 @@ export type Command = {
    * @param interaction - The interaction of the command
    */
   execute(interaction: CommandInteraction): Promise<void> | void;
+  autocomplete?(interaction: AutocompleteInteraction): Promise<void> | void;
 };
 
 /**
@@ -24,6 +25,7 @@ export type Command = {
 export const schema = z.object({
   data: z.record(z.any()),
   execute: z.function(),
+  autocomplete: z.function().optional(),
 });
 
 /**

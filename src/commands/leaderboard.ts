@@ -67,7 +67,7 @@ async function embedHouseLeaderboard(seasonId: number): Promise<EmbedBuilder> {
 
 async function embedHouseIndividual(seasonId: number): Promise<EmbedBuilder> {
   const points = await PointActions.getPointLeaderboardIndividual(seasonId, 10)
-  const sortedPoints = points.sort((a, b) => a.points! - b.points!)
+  const sortedPoints = points.sort((a, b) => b.points! - a.points!)
   const users = await Promise.all(sortedPoints.map(async (pts, _) => await Users.getById(pts.user_id!)))
   let description = sortedPoints.map((x, idx) => {
     const user = users.find(u => u?.id === x.user_id)
@@ -79,6 +79,7 @@ async function embedHouseIndividual(seasonId: number): Promise<EmbedBuilder> {
   return successEmbed
     .setTitle("House Leaderboard")
     .setDescription(description)
+    .setFields([])
 }
 
 function embedNoActiveSeasons(): EmbedBuilder {

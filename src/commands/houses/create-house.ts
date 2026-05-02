@@ -53,6 +53,7 @@ export default {
 function embed(house: HouseModel): EmbedBuilder {
   return successEmbed
     .setTitle("House Successfully Created")
+    .setDescription(" ")
     .setFields([
       { name: "House Name", value: `\`${house.house_name}\``, inline: true },
       { name: "House ID", value: `\`${house.id}\``, inline: true }

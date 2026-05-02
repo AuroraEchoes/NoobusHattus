@@ -6,16 +6,22 @@ import type { Event } from './index.js';
 const commands = await loadCommands(new URL('../commands/', import.meta.url));
 
 export default {
-	name: Events.InteractionCreate,
-	async execute(interaction) {
-		if (interaction.isCommand()) {
-			const command = commands.get(interaction.commandName);
+  name: Events.InteractionCreate,
+  async execute(interaction) {
+    if (interaction.isAutocomplete()) {
+      const command = commands.get(interaction.commandName);
+      if (command?.autocomplete) {
+        return command.autocomplete(interaction);
+      }
+    }
+    if (interaction.isCommand()) {
+      const command = commands.get(interaction.commandName);
 
-			if (!command) {
-				throw new Error(`Command '${interaction.commandName}' not found.`);
-			}
+      if (!command) {
+        throw new Error(`Command '${interaction.commandName}' not found.`);
+      }
 
-			await command.execute(interaction);
-		}
-	},
+      await command.execute(interaction);
+    }
+  },
 } satisfies Event<Events.InteractionCreate>;

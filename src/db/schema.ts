@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { bigint, boolean, foreignKey, integer, pgTable, primaryKey, uniqueIndex, varchar } from "drizzle-orm/pg-core";
+import { bigint, boolean, foreignKey, integer, pgTable, primaryKey, real, uniqueIndex, varchar } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   id: bigint({ mode: 'bigint' }).primaryKey().notNull().unique(),
@@ -69,12 +69,17 @@ export const summary_messages = pgTable("summary_messages", {
 ])
 
 export const permission_roles = pgTable("permission_roles", {
-  permission: varchar({ length: 32 }),
-  role_id: bigint({ mode: 'bigint' })
+  permission: varchar({ length: 32 }).notNull(),
+  role_id: bigint({ mode: 'bigint' }).notNull()
 }, (table) => [
   primaryKey({ columns: [table.permission, table.role_id] })
 ])
 
 export const processed_logs = pgTable("processed_logs", {
   log_id: bigint({ mode: 'bigint' }).primaryKey().unique(),
+})
+
+export const season_multipliers = pgTable("season_multipliers", {
+  season_id: integer().primaryKey().notNull().references(() => seasons.id),
+  point_multiplier: real().notNull().default(1.0)
 })

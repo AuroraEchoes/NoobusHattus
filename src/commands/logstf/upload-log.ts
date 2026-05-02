@@ -57,7 +57,7 @@ export default {
           const guildId = BigInt(interaction.guildId!)
           LogAwards.applyAwards(guildId, logsTfResponse, BigInt(redCap.id), BigInt(bluCap.id))
           await ProcessedLogs.add(BigInt(logId))
-          await interaction.reply({ embeds: [embed(userId, logId)] });
+          await interaction.reply({ embeds: [embed(userId, logId)], flags: MessageFlags.Ephemeral });
         }
       }
     }
@@ -110,5 +110,4 @@ function logAlreadyProcessedEmbed(logId: string): EmbedBuilder {
     .setFields([
       { name: "Log ID", value: `\`${logId}\``, inline: true },
     ])
-
 }

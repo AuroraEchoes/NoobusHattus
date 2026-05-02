@@ -49,6 +49,7 @@ export default {
 function embedSuccess(userDiscordId: bigint, quantity: number, reason: string): EmbedBuilder {
   return successEmbed
     .setTitle("Awarded points")
+    .setDescription(" ")
     .setFields([
       { name: "Target", value: `<@${userDiscordId}>` },
       { name: "Quantity", value: `${quantity}` },
